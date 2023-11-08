@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Aas - Accident Alerting Service (ऐक्सीडेंट अलर्ट सेवा)</title>
+    <!-- Add Bootstrap CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <!-- Add Google Fonts for Roboto -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <style>
+        body {
+            background-image: url("{{url_for('static',filename='images/background.jpg')}}");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-color: #13131f;
+            font-family: 'Roboto', sans-serif;
+            /* Apply the Roboto font */
+        }
+
+        .container {
+            background-color: #ffffff;
+            /* Container background color */
+            border-radius: 15px;
+            /* Container border radius */
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            /* Container shadow */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        {% if get_flashed_messages() %}
+        <div class="alert alert-info text-center mt-5" role="alert">
+            {{ get_flashed_messages() | join(" ") }}
+        </div>
+        {% endif %}
+        {% block section %}
+        {% endblock %}
+
+        <h1 class="m-3 text-center">Aas - Accident Alerting Service (ऐक्सीडेंट अलर्ट सेवा)</h1>
+        <form method="POST" enctype="multipart/form-data" class="text-center">
+            <div class="m-3">
+                <input type="file" class="form-control" name="file" accept=".mp4">
+            </div>
+            <button type="submit" class="btn btn-primary">Analyze Video (वीडियो का विश्लेषण करें)</button>
+        </form>
+        <br>
+
+        {% if alert %}
+        <div class="alert alert-danger" role="alert">
+            <p class="lead">Accident detected! Review the images (दुर्घटना की पहचान हो गई है! छवियों की समीक्षा करें।)
+            </p>
+            <form method="POST" action="/approve_alert">
+                <input type="hidden" name="alert_file" value="{{ alert_file }}">
+                <button type="submit" class="btn btn-success me-2">Approve Alert (अलर्ट स्वीकार करें)</button>
+                <a href="/" class="btn btn-secondary">Ignore Alert (अलर्ट नजरअंदाज करें)</a>
+            </form>
+            <div class="mt-2">
+                <strong>Alert File Name (अलर्ट फ़ाइल का नाम):</strong> {{ alert_file.split('.')[0] }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if alert_file %}
+        <h4 class="m-4">Location (स्थान): {{ alert_file }}</h4>
+        {% if frames_with_accident_base64 %}
+        <h4 class="m-4">Frames with Accidents (दुर्घटनाओं के साथ फ्रेम):</h4>
+        <div class="row">
+            {% for frame_base64 in frames_with_accident_base64 %}
+            <div class="col-md-4 mb-3">
+                <img src="data:image/jpeg;base64, {{ frame_base64 }}" class="img-fluid"
+                    alt="Accident Frame (दुर्घटना फ्रेम)">
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>
